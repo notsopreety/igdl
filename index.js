@@ -3,6 +3,8 @@ const axios = require('axios');
 const { URL } = require('url');
 
 const app = express();
+app.use(express.json());
+app.set('json spaces', 2);
 const PORT = 3000;
 
 // Function to clean Instagram URL and fetch JSON data

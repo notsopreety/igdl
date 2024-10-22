@@ -70,8 +70,18 @@ app.get('/api/instagram', async (req, res) => {
         // Clean the Instagram URL to add necessary query parameters
         const cleanedUrl = cleanInstagramUrl(url);
 
-        // Fetch Instagram post JSON data
-        const response = await axios.get(cleanedUrl);
+        // Set up headers to mimic a real user request
+        const headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Referer': 'https://www.instagram.com/',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'X-Requested-With': 'XMLHttpRequest',
+            // Optionally, you can include session cookies here if required
+            // 'Cookie': 'sessionid=YOUR_SESSION_ID; csrftoken=YOUR_CSRF_TOKEN; ...'
+        };
+
+        // Fetch Instagram post JSON data with headers
+        const response = await axios.get(cleanedUrl, { headers });
         const instagramJson = response.data;
 
         // Extract only the necessary data from the Instagram JSON

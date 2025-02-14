@@ -7,9 +7,8 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors({
-  origin: '*', // Temporary for testing
-  methods: 'GET',
-  allowedHeaders: ['Content-Type']
+  origin: ['https://instagramdownloader-7odb.onrender.com', 'https://samirbadaila.com.np'],
+  methods: 'GET'
 }));
 
 // Add rate limiting
@@ -138,11 +137,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-module.exports = app;
-
-// Add serverless function handler
-if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`Server running on port ${port}`);
-    });
-}
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});

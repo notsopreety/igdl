@@ -1,10 +1,30 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(require('cors')());
+app.use(cors({
+  origin: ['https://igdl-roan.vercel.app', 'https://samirbadaila.com.np'],
+  methods: 'GET'
+}));
+
+// Add rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
+// Add request timeout handling
+app.use((req, res, next) => {
+  req.setTimeout(10000, () => {
+    res.status(504).json({ error: 'Request timeout' });
+  });
+  next();
+});
 
 // Instagram GraphQL API endpoint
 const INSTAGRAM_API = 'https://www.instagram.com/p/{shortcode}/?__a=1&__d=dis';
@@ -68,10 +88,20 @@ app.get('/api/download', async (req, res) => {
         res.json(result);
 
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ 
-            error: 'Failed to fetch post data',
-            details: error.message 
+        console.error(`[${new Date().toISOString()}] Error:`, {
+            message: error.message,
+            url: postUrl,
+            stack: error.stack
+        });
+        
+        const statusCode = error.response?.status || 500;
+        const errorMessage = error.response?.status === 404 
+            ? 'Post not found or private account' 
+            : 'Failed to fetch post data';
+
+        res.status(statusCode).json({ 
+            error: errorMessage,
+            ...(process.env.NODE_ENV === 'development' && { details: error.message })
         });
     }
 });
@@ -97,6 +127,15 @@ function parseMediaItem(node) {
     
     return mediaItem;
 }
+
+// Update error handling middleware
+app.use((err, req, res, next) => {
+  console.error(`[${new Date().toISOString()}] Error:`, err);
+  res.status(500).json({
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

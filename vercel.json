@@ -9,8 +9,8 @@
   "routes": [
     {
       "src": "/api/download",
-      "dest": "index.js",
-      "methods": ["GET"]
+      "methods": ["GET"],
+      "dest": "index.js"
     }
   ]
-}
+} 

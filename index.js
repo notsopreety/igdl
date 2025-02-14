@@ -7,8 +7,9 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors({
-  origin: ['https://igdl-roan.vercel.app', 'https://samirbadaila.com.np'],
-  methods: 'GET'
+  origin: '*', // Temporary for testing
+  methods: 'GET',
+  allowedHeaders: ['Content-Type']
 }));
 
 // Add rate limiting
@@ -137,6 +138,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+module.exports = app;
+
+// Add serverless function handler
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+}
